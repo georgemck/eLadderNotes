@@ -1,0 +1,146 @@
+
+
+
+___NOTES REGARDING RUNNING THIS REPOSITORY___
+https://github.com/bastiRe/eLadder
+
+
+
+*****PREREQUISITES*****
+  POSTGRESQL DATABASE
+**********************
+
+
+
+
+STEP ONE. SETTING UP THE DATABASE by Command Line 
+(these commands were issued inside the directory where PostgreSQL is installed)
+
+  createuser -U postgres -s username
+  //using default admin user postgres, create user named 'username'
+  //done this way, the new user will be an Admin, you may not want this...
+  
+  createdb databasename
+  //database gets created
+  
+  //the user needs a password for the database connection to work
+  //this is a SQL statement for changing a user password
+  ALTER USER username WITH PASSWORD 'newpassword';
+  
+  
+  
+  
+  
+STEP TWO. TESTING THE DATABASE
+(Postgraphile is an easy to use NPM module)  
+ 
+   //Postgraphile aka postgraphql
+   npm install -g postgraphile
+   
+   //one line command for connecting to a default postgresql database
+   postgraphile
+   
+   //test that the same connection string defined in the Server works
+   postgraphile  -c "postgres://username:password@localhost:5432/databasename"
+   
+
+
+
+
+
+STEP THREE. SETTING UP THE NODE.JS SERVER WITH GRAPHIQL:
+(GRAPHIQL NEEDS A DATABASE CONNECTION TO WORK. THIS APPLICATION USES POSTGRESQL. YOU WILL NEED TO SET ONE UP)
+
+About Docker... I didn't use it. I ran the application locally without it. My preferred environment for this would be WSL on my Windows 10 PC. Yet, WSL does not have systemd which is required by Docker. 
+"If you're getting this error in the Windows Subsystem for Linux (WSL), I've found it's because Docker is unsupported. This is due to lack of cgroups and other prerequisites." 
+-- https://askubuntu.com/questions/813588/systemctl-failed-to-connect-to-bus-docker-ubuntu16-04-container
+-- https://github.com/systemd/systemd/issues/8036
+
+//server/src/index.js -- I hard-coded port and engine key and did not use SENTRY_DSN (logging service)
+   const port = 5000;
+   process.env.APOLLO_ENGINE_KEY = "service:georgemck-7580:**********-_2QcQ";
+   //if you are using ApolloServer with Apollo Engine, you will need a key from  
+     -- https://www.apollographql.com/docs/engine/setup-standalone.html
+     -- https://engine.apollographql.com
+   //a service offered by Apollo for performance analytics of your server
+   graphQLServer.listen(port).then(() => console.log(`Server is running on ` + port));
+   //added the port to be logged when started
+
+//server/knexfile.js -- 
+   "postgres://username:password@localhost:5432/databasename"
+   //updated connection for both development and production 
+   //process.env.DATABASE_URL
+   // https://knexjs.org
+   
+//server/config.env
+   //updated these environment variables to match the knexfile above
+   
+//server/src/db/index.js   
+   //updated the process.env.DATABASE_URL
+   //Port 5432 is common for PostgreSQL 
+   //"postgres://username:password@localhost:5432/databasename"
+   
+//basic setup for the package.json
+   npm install 
+   
+//Prepare the database.
+   yarn knex migrate:latest
+   //if the database connection is correct, the tables will be created in the PostgreSQL database
+   
+
+//also might need to add moment:
+   npm install --save moment
+   
+//launch server with:
+   serve-dev
+
+
+
+
+STEP FOUR. ANDROID EMULATOR TESTING:
+I had issues with multiple emulators and attached Android devices by USB. I deleted and disconnected all but the one AVD. Of course, requires Android SDK.
+Start the emulator. If you know have an avd, you can start it by command line (both avdmanager and emulator are in my PATH):    
+
+Create Emulator
+   avdmanager create avd -n Nexus_S_API_23 -k "system-images;android-24;default;x86_64" -g "default"
+
+List Emulators
+   emulator -list-avds 
+   avdmanager list 
+        -->  Nexus_S_API_23
+Launch Emulator
+   emulator -avd Nexus_S_API_23
+
+Delete Emulator
+   avdmanager delete avd -n Nexus_S_API_23
+
+
+
+STEP FIVE. SETTING UP THE REACT NATIVE APP:
+(this app has limited functionality without a working server to connect to. Probably want to setup and test the server first)
+
+  // constants/Environment.js file  MUST point to your working GraphiQL server
+  set the apiUrl: "http://192.168.0.13:5000" 
+
+  //basic setup for the package.json
+     npm install 
+
+  //also might need to add @expo/vector-icons:
+     npm install --save @expo/vector-icons
+
+  //launch app with:
+     yarn start
+
+  //launch the Expo app in the simular by pressing the letter 'a', or using the web page's 'Run on Android device/simulator' 
+
+
+
+
+HOPEFULLY THAT'S IT!
+
+
+
+
+
+
+
